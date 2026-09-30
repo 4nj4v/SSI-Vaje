@@ -17,15 +17,15 @@ Vsaka vaja se nahaja v svoji mapi, znotraj katere je datoteka **README.md**, ki 
 
 | Mapa | Vsebina vaje |
 |------|--------------|
-| `lab01` | Uvod v Linux: osnove dela v ukazni lupini |
-| `lab02` | Dovoljenja v Linuxu (chmod tabele, simbolni in oktalni način) |
-| `lab03` | Delo z datotekami: seq, sort, grep, wc, find, tr, head, tail |
-| `lab04` | Osnove Bash skriptiranja (echo, vnos podatkov, argumenti, zanke) |
-| `lab05` | Napredne Bash skripte (rekurzija, kalkulator, funkcije, delo z datotekami) |
-| `lab06` | Kompleksna Bash vaja: ustvarjanje, procesiranje, arhiviranje in analiza datotek |
-| `lab07` | Upravljanje uporabnikov in skupin (adduser, groupadd, sudo, zaklepanje računov) |
-| `lab08` | Namestitev LAMP (Apache2, MySQL/MariaDB, PHP) in konfiguracija Virtual Host strežnikov |
-| `lab09` | Projekt — Vzpostavitev dveh strežnikov v oblaku (spletni in delovni strežnik) |
+| `lab01` | Osnove dela v Linux okolju |
+| `lab02` | Dovoljenja in delo z arhivi v Linuxu |
+| `lab03` | Uporaba več ukazov in preusmeritev za obdelavo podatkov |
+| `lab04` | Osnove Bash skript |
+| `lab05` | Naprednejše Bash skripte (funkcije, vnos podatkov, izračuni) |
+| `lab06` | Napredna Bash skripta – delo z datotekami, filtri in orodji ukazne vrstice |
+| `lab07` | Procesi in uporabniki |
+| `lab08` | Namestitev LAMP (Apache2, MySQL, PHP) in skripta za Virtual Host |
+| `lab09` | Projekt — Vzpostavitev dveh strežnikov v oblaku (Web + Work Server) |
 
 ---
 
@@ -36,7 +36,7 @@ Vsaka vaja se nahaja v svoji mapi, znotraj katere je datoteka **README.md**, ki 
 - Razumevanje uporabnikov in skupin  
 - Uporabo naprednih ukazov za obdelavo podatkov  
 - Pisanje lastnih Bash skript (od osnovnih do kompleksnih)  
-- Upravljanje procesov, servisov in arhiviranja  
+- Analizo sistemskih logov ter upravljanje procesov, servisov in arhiviranja  
 - Uvod v strežniško administracijo (LAMP)
 
 ---

@@ -1,243 +1,233 @@
-# Vaja 7: Napredna Bash skripta – delo z datotekami, filtri in orodji ukazne vrstice
+# Vaja 7: Procesi in uporabniki
 
-Cilj te vaje je, da ponovimo delo z Bash in uporabimo znanje za kreiranje malce bolj **napredne skripte**.
+Vaša naloga v tej vaji bo raziskati in analizirati obdelavo log datotek na sistemu Ubuntu, pregledati procese ter upravljati uporabnike in skupine. S pomočjo obstoječih log datotek boste razvili skripte, ki izločijo relevantne informacije o delovanju sistema, napakah in uporabniških aktivnostih. Na koncu boste pripravili poročilo o analizi logov in o dogodkih, ki jih zaznate v realnem času.
 
-➡️ Vaša naloga je napisati **eno ukazno skripto**, npr. `vaja3.sh`, ki **zaporedno izvede vse spodnje naloge**.
+Log datoteke se nahajajo v mapi `/var/log/` na sistemu Ubuntu. Analizirajte naslednje log datoteke:
 
-Lahko si pomagate tako, da za vsako nalogo najprej pripravite svojo skripto, nato pa jih združite v eno samo glavno skripto.
+- **syslog** — vse splošne sistemske informacije.
+- **auth.log** — informacije o prijavah, odjavah in napakah pri prijavi.
+- **dmesg** — nizkonivojski logi sistemskih dogodkov (zaznavanje naprav, napake strojne opreme itd.).
+- **dpkg.log** — beleži dogodke, povezane z upravljanjem paketov (npr. nameščanje ali posodabljanje paketov z uporabo APT).
 
----
-
-## Naloga 1: Ustvarjanje datotek
-
-1. Ustvarite direktorij z imenom `VajaBash`.
-2. V tem direktoriju ustvarite **5 praznih datotek** z imeni:
-   - `file1.txt`
-   - `file2.txt`
-   - `file3.txt`
-   - `file4.txt`
-   - `file5.txt`
-
-Datotek **ne ustvarjajte ročno**, ampak jih generirajte s skripto s pomočjo **sekvence**.
-
-Primer (znotraj skripte):
-
-```bash
-mkdir -p VajaBash
-
-for i in {1..5}
-do
-    touch "VajaBash/file${i}.txt"
-done
-```
+Za branje večine datotek v `/var/log/` potrebujete `sudo`.
 
 ---
 
-## Naloga 2: Preimenovanje datotek
+## Naloga 1: Analiza dnevniških datotek
 
-Preimenujte vse datoteke v mapi `VajaBash` tako, da jim dodate pripono `_old` **pred končnico** `.txt`.
+Ustvarite skript `analiza_logov.sh`, ki bo opravil naslednje naloge:
 
-Primer:  
-`file1.txt` → `file1_old.txt`
+- Preštel vse napake (`error` ali `fail`) v zadnjih 100 vrsticah datoteke `syslog` in `auth.log` ter izpisal te napake.
+- Preštel vse neuspele prijave (failed login attempts) v datoteki `auth.log`.
+- Izpisal zadnjih 50 sistemskih sporočil iz `dmesg`, ki vključujejo naprave, ki jih sistem zazna ali odstrani.
 
-Primer rešitve:
+Primer skripte:
 
 ```bash
-cd VajaBash
+#!/bin/bash
 
-for f in file*.txt
-do
-    mv "$f" "${f%.txt}_old.txt"
-done
+echo "=== Napake v zadnjih 100 vrsticah syslog ==="
+sudo tail -n 100 /var/log/syslog | grep -Ei 'error|fail'
+echo "Število: $(sudo tail -n 100 /var/log/syslog | grep -Eic 'error|fail')"
 
-cd ..
+echo "=== Napake v zadnjih 100 vrsticah auth.log ==="
+sudo tail -n 100 /var/log/auth.log | grep -Ei 'error|fail'
+echo "Število: $(sudo tail -n 100 /var/log/auth.log | grep -Eic 'error|fail')"
+
+echo "=== Neuspele prijave v auth.log ==="
+sudo grep -Ei 'failed password|authentication failure' /var/log/auth.log
+echo "Število: $(sudo grep -Eic 'failed password|authentication failure' /var/log/auth.log)"
+
+echo "=== Zadnjih 50 sporočil dmesg o napravah ==="
+sudo dmesg | grep -Ei 'usb|device|attached|removed|detect' | tail -n 50
 ```
 
----
-
-## Naloga 3: Izpis direktorija
-
-Izpišite vsebino direktorija `VajaBash` v datoteko `seznam_datotek.txt`.
+Zaženite skripto:
 
 ```bash
-ls VajaBash > seznam_datotek.txt
+chmod +x analiza_logov.sh
+./analiza_logov.sh
 ```
 
----
+Ustvarite še skript `dpkg_analiza.sh`, ki analizira datoteko `/var/log/dpkg.log` in izpiše informacije o vseh paketih, ki so bili nameščeni ali posodobljeni v zadnjih 7 dneh.
 
-## Naloga 4: Dodajanje vsebine v datoteke
-
-V direktoriju `VajaBash`:
-
-1. V datoteko `file1_old.txt` dodajte niz:
+Primer skripte:
 
 ```bash
-echo "Vsebina za iskanje z grep." >> VajaBash/file1_old.txt
+#!/bin/bash
+
+since=$(date -d '7 days ago' '+%Y-%m-%d')
+
+echo "Paketi, nameščeni ali posodobljeni od $since:"
+sudo awk -v since="$since" '
+  $1 >= since && ($3 == "install" || $3 == "upgrade") { print }
+' /var/log/dpkg.log
 ```
 
-2. Z ukazom `wget` ali `curl` pridobite vsebino iz naslova:
-
-`http://metaphorpsum.com/paragraphs/3/5`
-
-in to **dopiši** v `file1_old.txt`:
-
 ```bash
-wget -qO- http://metaphorpsum.com/paragraphs/3/5 >> VajaBash/file1_old.txt
-# ali
-curl -s http://metaphorpsum.com/paragraphs/3/5 >> VajaBash/file1_old.txt
-```
-
-3. V `file2_old.txt` zapišite niz:
-
-```bash
-echo "Poglejte me z grep." >> VajaBash/file2_old.txt
-```
-
-4. V `file3_old.txt` zapišite niz:
-
-```bash
-echo "Šteje me z wc." >> VajaBash/file3_old.txt
-```
-
-5. V `file4_old.txt` zapišite niz:
-
-```bash
-echo "Računam s bc -l" >> VajaBash/file4_old.txt
-```
-
-6. V `file5_old.txt` zapišite niz:
-
-```bash
-echo "Spreminjam s tr." >> VajaBash/file5_old.txt
+chmod +x dpkg_analiza.sh
+./dpkg_analiza.sh
 ```
 
 ---
 
-## Naloga 5: Filtriranje in obdelava z grep, find, wc, bc in tr
+## Naloga 2: Poročilo o analizi
 
-1. Uporabite `grep`, da poiščete **vse datoteke** v `VajaBash`, ki vsebujejo besedo `"grep"`, in rezultate zapišite v `grep_rezultati.txt`:
+Recimo, da ste sistemski administrator v podjetju, ki se ukvarja z IT storitvami, in skrbite za strežnik naročnika. Vodja tehnološkega razvoja ima prihodnji teden sestanek, kjer bo predstavil poročilo varnostnega testiranja strežnika. Del tega poročila bo tudi poročilo o varnostnih tveganjih.
+
+Po izvedbi prejšnje naloge pripravite poročilo, v katerem vključite naslednje:
+
+- Povzetek o številu napak in neuspelih prijav, ki ste jih zaznali.
+- Analizo zadnjih 50 sistemskih sporočil iz `dmesg` in ugotovitev, ali so bile kakšne naprave nepravilno zaznane ali odstranjene.
+- Učinkovitost vašega sistema (npr. ali ste zaznali kakšno napako ali ranljivost).
+
+---
+
+## Naloga 3: Delo s procesi
+
+1. Prikažite vse trenutno aktivne procese v terminalu:
 
 ```bash
-grep -r "grep" VajaBash > grep_rezultati.txt
+ps aux
 ```
 
-2. Uporabite `find` (v kombinaciji z `grep`), da poiščete **vse datoteke**, ki vsebujejo niz `"bc -l"`, in jih zapišite v `bc_datoteke.txt`:
+2. Prikažite vse procese, ki jih poganja vaš uporabnik:
 
 ```bash
-find VajaBash -type f -exec grep -l "bc -l" {} \; > bc_datoteke.txt
+ps -u "$USER"
 ```
 
-3. Uporabite `wc`, da preštejete število besed v `file3_old.txt` in rezultat zapišeš v `stevilo_besed_file3.txt`:
+3. S pomočjo ukaza `top` preglejte procese v realnem času. Kateri porablja največ procesorja in pomnilnika?
 
 ```bash
-wc -w VajaBash/file3_old.txt > stevilo_besed_file3.txt
+top
 ```
 
-4. Uporabite `bc` oziroma `bc -l`, da izračunate **kvadratni koren števila 16** in rezultat zapišeš v `kvadratni_koren.txt`:
+Iz `top` izstopite s tipko `q`.
+
+4. Ponovno zaženite `top` in zabeležite PID poljubnega procesa, nato proces ustavite v konzoli:
 
 ```bash
-echo "sqrt(16)" | bc -l > kvadratni_koren.txt
+kill PID
 ```
 
-5. Uporabite `tr`, da v datoteki `file5_old.txt` **spremenite vse črke `a` v `A`**:
+Če se proces ne ustavi, uporabite:
 
 ```bash
-tr 'a' 'A' < VajaBash/file5_old.txt > VajaBash/file5_old_tmp.txt
-mv VajaBash/file5_old_tmp.txt VajaBash/file5_old.txt
+kill -9 PID
+```
+
+5. Z ukazom `ps` poiščite procese, ki vsebujejo določeno ime (na primer `bash`):
+
+```bash
+ps aux | grep bash
 ```
 
 ---
 
-## Naloga 6: Izpis vsebine datotek (head in tail)
+## Naloga 4: Dodajanje novega uporabnika
 
-1. Uporabite `head`, da izpišete **prvi 2 vrstici** datoteke `file1_old.txt` in rezultat zapišete v `prve_dve_vrstici.txt`:
-
-```bash
-head -n 2 VajaBash/file1_old.txt > prve_dve_vrstici.txt
-```
-
-2. Uporabite `tail`, da izpišeš **zadnje 3 vrstice** datoteke `file2_old.txt` in rezultat zapišete v `zadnje_tri_vrstice.txt`:
+1. Dodajte novega uporabnika z imenom `student1`.
+2. Med ustvarjanjem vnesite osnovne podatke, kot so geslo, polno ime in ostale informacije.
+3. Preverite, ali je bil uporabnik `student1` uspešno dodan.
 
 ```bash
-tail -n 3 VajaBash/file2_old.txt > zadnje_tri_vrstice.txt
+sudo adduser student1
+id student1
 ```
 
 ---
 
-## Naloga 7: Povprečna dolžina znakov datotek z `old` v imenu
+## Naloga 5: Dodajanje uporabnika v skupino
 
-1. V datoteki `seznam_datotek.txt` poiščite vse datoteke, ki vsebujejo `old` v imenu.
-2. Za vsako izmed teh datotek izračunajte **dolžino znakov**.
-3. Rezultate zapišite v `povprecna_dolzina.txt`.
-4. Na koncu izračunajte **povprečno dolžino znakov** in jo dopišite v isto datoteko.
-
-Namig – možen pristop:
+1. Ustvarite novo skupino `studenti`.
+2. Dodajte uporabnika `student1` v skupino `studenti`.
+3. Preverite, ali je bil uporabnik `student1` uspešno dodan v skupino.
 
 ```bash
-files=$(grep "old" seznam_datotek.txt)
-
-> povprecna_dolzina.txt
-total=0
-count=0
-
-for f in $files
-do
-    len=$(wc -m < "VajaBash/$f")
-    echo "$f $len" >> povprecna_dolzina.txt
-    total=$((total + len))
-    count=$((count + 1))
-done
-
-if [ $count -gt 0 ]; then
-    avg=$((total / count))
-    echo "Povprečna dolžina: $avg" >> povprecna_dolzina.txt
-fi
+sudo groupadd studenti
+sudo usermod -aG studenti student1
+groups student1
 ```
 
 ---
 
-## Naloga 8: Arhiviranje datotek
+## Naloga 6: Sprememba gesla uporabnika
 
-1. Ustvarite direktorij `Arhiv`:
+1. Spremenite geslo za uporabnika `student1`.
+2. Vpišite novo geslo in preverite, ali je bila sprememba uspešna.
 
 ```bash
-mkdir -p Arhiv
+sudo passwd student1
+sudo passwd -S student1
 ```
 
-2. Kopirajte vse datoteke v `VajaBash`, ki imajo v imenu niz `old`, v direktorij `Arhiv`:
+Stanje `P` pomeni, da ima račun uporabno geslo. Prijavo preverite z:
 
 ```bash
-cp VajaBash/*old* Arhiv/
-```
-
-3. Ustvarite ZIP arhiv vseh datotek v direktoriju `VajaBash` z imenom `arhiv.zip`:
-
-```bash
-zip -r arhiv.zip VajaBash
+su - student1
 ```
 
 ---
 
-## Preverjanje pravilnosti
+## Naloga 7: Uporabniške pravice
 
-Za preverjanje vaje uporabite skripto `preveri.sh`, ki jo pridobite z:
-
-```bash
-wget -O preveri.sh https://pastebin.com/raw/ygTeNuSg
-```
-
-Pred zagonom je potrebno popraviti **CRLF endline**:
+1. Dovolite uporabniku `student1`, da lahko uporablja `sudo` ukaze.
+2. Preverite, ali ima uporabnik `student1` zdaj pravice za `sudo`.
 
 ```bash
-sed -i 's/
-$//' preveri.sh
+sudo usermod -aG sudo student1
+groups student1
+sudo -l -U student1
 ```
 
-Nato skripto zaženite:
+---
+
+## Naloga 8: Zaklepanje in odklepanje uporabniškega računa
+
+1. Zaklenite uporabniški račun za `student1`.
+2. Preverite, ali je račun zaklenjen, tako da se poskusite prijaviti kot `student1`. Prijava bi morala biti zavrnjena.
+3. Odklenite račun za `student1`.
 
 ```bash
-bash preveri.sh
+sudo passwd -l student1
+sudo passwd -S student1
+su - student1
+sudo passwd -u student1
 ```
 
-📤 **Oddaja:**  
-Oddajte vsebino izpisa skripte `preveri.sh` (npr. prekopirano iz terminala ali preusmerjeno v datoteko).
+Stanje `L` pomeni, da je geslo zaklenjeno.
+
+---
+
+## Naloga 9: Brisanje uporabnika
+
+1. Ustvarite novega uporabnika z imenom `testni_uporabnik`.
+2. Preverite, ali je bil uporabnik uspešno dodan.
+3. Izbrišite uporabnika `testni_uporabnik`, vendar obdržite domačo mapo.
+4. Nato odstranite še domačo mapo.
+
+```bash
+sudo adduser testni_uporabnik
+id testni_uporabnik
+sudo deluser testni_uporabnik
+ls /home/testni_uporabnik
+sudo rm -rf /home/testni_uporabnik
+```
+
+Ukaz `deluser` na Ubuntu račun odstrani in domačo mapo pusti. Popoln izbris računa skupaj z domačo mapo v enem koraku je:
+
+```bash
+sudo deluser --remove-home testni_uporabnik
+```
+
+---
+
+## Oddaja
+
+Oddajte:
+
+- skripti `analiza_logov.sh` in `dpkg_analiza.sh`,
+- poročilo iz naloge 2,
+- kratke izpise ukazov iz naloge 3 (procesi, PID, ki ste ga ustavili, in iskanje po imenu),
+- izpise ukazov iz nalog 4–9 (uporabnik, skupina, geslo, sudo, zaklep in brisanje).
