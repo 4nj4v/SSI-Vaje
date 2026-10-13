@@ -11,58 +11,87 @@ Pogledali bomo kako:
 ---
 
 ## 🧱 Predpogoji
-- Ustvarjen Linux strežnik (npr. Ubuntu Server) v **Microsoft Azure** okolju  
-- Dostop do strežnika preko **SSH protokola**
+
+Vajo lahko opravite v **GitHub Codespaces** ali na Linux strežniku v **Microsoft Azure**.  
+Vse ukaze v tej vaji izvajate v mapi `lab01`.
+
+### GitHub Codespaces
+
+1. Najprej **forkajte** repozitorij na svoj GitHub račun (gumb **Fork**).
+2. Odprite **svoj fork** in v njem ustvarite Codespace: **Code → Codespaces → Create codespace**.
+3. V terminalu Codespaces se premaknite v mapo vaje:
+
+   ```bash
+   cd lab01
+   ```
+
+### Microsoft Azure
+
+1. Ustvarite Linux strežnik (npr. Ubuntu Server) in se nanj povežite preko SSH:
+
+   ```bash
+   ssh uporabnisko_ime@ip_naslov
+   ```
+
+2. Klonirajte repozitorij in se premaknite v mapo vaje:
+
+   ```bash
+   git clone https://github.com/rpritr/SSI-Vaje.git
+   cd SSI-Vaje/lab01
+   ```
+
+Če terminal kasneje odprete znova, se pred nadaljevanjem vrnite v `lab01` (`cd lab01` v Codespaces oziroma `cd SSI-Vaje/lab01` na Azure).
 
 ---
 
 ## 🧮 Vaja 1.1: Uporaba osnovnih Linux ukazov
 
-1. Preko SSH se povežite na svoj strežnik:
-   ```bash
-   ssh uporabnisko_ime@ip_naslov
-   ```
-2. Prijavite se s svojim uporabniškim imenom in geslom.
-3. Izpišite trenutni imenik:
+Ukaze izvajajte v mapi `lab01`.
+
+1. Izpišite trenutni imenik in preverite, da ste v `lab01`:
    ```bash
    pwd
    ```
-4. V domačem imeniku ustvarite mapo `vaje` in v njej podmapo `vaja1`:
+2. V mapi `lab01` ustvarite mapo `vaje` in v njej podmapo `vaja1`:
    ```bash
-   mkdir -p ~/vaje/vaja1
+   mkdir -p vaje/vaja1
    ```
-5. Ustvarite datoteko `vaja1.txt`:
+3. Ustvarite datoteko `vaja1.txt`:
    ```bash
-   touch ~/vaje/vaja1/vaja1.txt
+   touch vaje/vaja1/vaja1.txt
    ```
-6. V datoteko `vaja1.txt` kopirajte besedilo navodil za vajo.  
-7. Izpišite vsebino datoteke v terminal:
+4. V datoteko `vaja1.txt` kopirajte besedilo navodil za vajo.  
+5. Izpišite vsebino datoteke v terminal:
    ```bash
-   cat ~/vaje/vaja1/vaja1.txt
+   cat vaje/vaja1/vaja1.txt
    ```
-8. Izpišite vsebino korenskega imenika:
+6. Izpišite vsebino korenskega imenika:
    ```bash
    ls /
    ```
-9. Preverite velikost datoteke `vaja1.txt`:
+7. Preverite velikost datoteke `vaja1.txt`:
    ```bash
-   ls -lh ~/vaje/vaja1/vaja1.txt
+   ls -lh vaje/vaja1/vaja1.txt
    ```
-10. Ustvarite datoteko `log.txt` in vanjo zapišite seznam datotek v imeniku `vaja1`:
-    ```bash
-    ls ~/vaje/vaja1 > ~/vaje/vaja1/log.txt
-    ```
-11. V isto datoteko dodajte izhod ukaza `df -h`:
-    ```bash
-    df -h >> ~/vaje/vaja1/log.txt
-    ```
-12. Preverite dosegljivost strežnika `vss.scv.si`:
+8. Ustvarite datoteko `log.txt` in vanjo zapišite seznam datotek v imeniku `vaja1`:
+   ```bash
+   ls vaje/vaja1 > vaje/vaja1/log.txt
+   ```
+9. V isto datoteko dodajte izhod ukaza `df -h`:
+   ```bash
+   df -h >> vaje/vaja1/log.txt
+   ```
+10. Preverite dosegljivost strežnika `vss.scv.si`:
     ```bash
     ping -c 5 vss.scv.si
     ```
-13. Zapišite IP naslov strežnika v datoteko `vaja1.txt`.
-14. Iz izpisa `ping` zabeleži **min, max in avg** vrednosti ter število poslanih in prejetih paketov.
-15. Rezultate konzolnega izpisa shranite v datoteko:
+    Če ukaz `ping` ni na voljo (paket ni nameščen), ga namestite:
+    ```bash
+    sudo apt update
+    sudo apt install iputils-ping
+    ```
+11. Zapišite IP naslov strežnika v datoteko `vaja1.txt`.
+12. Rezultate konzolnega izpisa shranite v datoteko:
     ```
     ime_priimek_vaja1_1.txt
     ```
@@ -71,6 +100,8 @@ Pogledali bomo kako:
 ---
 
 ## 💻 Vaja 1.2: Pridobivanje podatkov o sistemu
+
+Ukaze izvajajte v mapi `lab01`.
 
 1. Izpišite osnovne informacije o sistemu:
    ```bash
@@ -109,7 +140,9 @@ Pogledali bomo kako:
 
 ## ⚙️ Vaja 1.3: Pridobivanje podatkov o strojni opremi
 
-1. Povežite se na svoj Linux strežnik preko SSH.  
+Ukaze izvajajte v mapi `lab01`.
+
+1. Preverite, da ste v mapi `lab01` (`pwd`).  
 2. Ustvarite novo datoteko `strojna_oprema.txt`.  
 3. V datoteko dodajte rezultate naslednjih ukazov:
    ```bash
